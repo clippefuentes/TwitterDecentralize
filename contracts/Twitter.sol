@@ -59,16 +59,21 @@ contract Twitter {
     tweet.likes--;
   }
 
-  function addComment(string memory _comment, uint _id) public {
+  function addComment(string memory _comment, uint _id) public payable {
     Tweets storage tweet = tweets[_id];
-    Comment storage comment = tweet.comments[tweet.comments.length];
+    uint commentId = tweet.comments.length;
+    Comment storage comment = tweet.comments.push();
     comment.comment = _comment;
     comment.author = msg.sender;
     comment.timestamp = block.timestamp;
-    comment.id = tweet.comments.length;
+    comment.id = commentId;
   }
 
   function getUserTweets(address _user) public view returns (uint[] memory) {
     return userTweets[_user];
+  }
+
+  function getTweetComments(uint _id) public view returns (Comment[] memory) {
+    return tweets[_id].comments;
   }
 }
