@@ -21,7 +21,9 @@ contract Twitter {
 
   Tweets[] public tweets;
   uint public nextTweetId = 0;
-  mapping(address => uint[]) public userTweets;
+  mapping(address => uint[]) userTweets;
+
+  constructor() payable {}
 
   modifier hasLiked(uint _id) {
     Tweets storage tweet = tweets[_id];
@@ -35,15 +37,14 @@ contract Twitter {
     _;
   }
 
-  function createTweet(string memory _tweet) public {
-    Tweets storage tweet = tweets[nextTweetId];
+  function createTweet(string memory _tweet) public payable {
+    Tweets storage tweet = tweets.push();
     tweet.id = nextTweetId;
     tweet.tweet = _tweet;
     tweet.author = msg.sender;
     tweet.timestamp = block.timestamp;
     tweet.likes = 0;
     userTweets[msg.sender].push(nextTweetId);
-    nextTweetId++;
   }
 
   function likeTweet(uint _id) external hasNotLiked(_id)  {
@@ -65,5 +66,9 @@ contract Twitter {
     comment.author = msg.sender;
     comment.timestamp = block.timestamp;
     comment.id = tweet.comments.length;
+  }
+
+  function getUserTweets(address _user) public view returns (uint[] memory) {
+    return userTweets[_user];
   }
 }
