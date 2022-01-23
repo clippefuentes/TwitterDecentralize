@@ -1,5 +1,7 @@
 import { useEffect, useCallback, useContext } from "react";
+import { ethers } from "ethers";
 import { AppContext } from '../../context'
+import Twitter from '../../../artifacts/contracts/Twitter.sol/Twitter.json'
 
 import Header, { HeaderProps } from './header';
 
@@ -16,6 +18,8 @@ const Layout = (props: any) => {
     setAccount: setCurrentAccount,
     setHasMetamask,
     setLoading,
+    setTweets,
+    tweets
   } = useContext(AppContext);
 
   const { children } = props;
@@ -26,7 +30,6 @@ const Layout = (props: any) => {
         setHasMetamask(false);
       } else {
         const { ethereum } = window;
-        // const provider = new ethers.providers.Web3Provider(window.ethereum);
         setHasMetamask(true);
 
         const accounts = await ethereum.request({ method: 'eth_accounts' });
@@ -63,9 +66,45 @@ const Layout = (props: any) => {
     }
   }, [setCurrentAccount, currentAccount, setLoading])
 
+  const getTwitterTweets = useCallback(async () => {
+    try {
+      if (window.ethereum) {
+        const { ethereum } = window;
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const connectedContract = new ethers.Contract('0x5FbDB2315678afecb367f032d93F642f64180aa3', Twitter.abi, signer);
+        const tweetsLength = await connectedContract.getTweetLength();
+        const tweets = await connectedContract.tweets;
+
+        const tweetsArray = [];
+
+        for (let i = 0; i < tweetsLength; i++) {
+          const tweet = await tweets(i);
+          console.log('tweet', tweet);
+          const [id, tweetInfo, author, timestamp, likes] = tweet;
+          const tweetObject = {
+            id: id.toString(),
+            tweetInfo,
+            author,
+            timestamp: new Date(timestamp.toNumber() * 1000),
+            likes: likes.toNumber(),
+          };
+          tweetsArray.push(tweetObject);
+          console.log('tweetObject', tweetObject)
+        }
+
+        setTweets(tweetsArray);
+      }
+    } catch (err) {
+      // Router to error page
+      console.error('err', err);
+    }
+  }, [tweets, setTweets])
+
 
   useEffect(() => {
     checkIfWalletIsConnected();
+    getTwitterTweets();
   }, [])
 
   return (

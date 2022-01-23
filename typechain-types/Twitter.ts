@@ -9,6 +9,7 @@ import {
   CallOverrides,
   ContractTransaction,
   Overrides,
+  PayableOverrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -17,16 +18,34 @@ import { FunctionFragment, Result } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
+export declare namespace Twitter {
+  export type CommentStruct = {
+    id: BigNumberish;
+    comment: string;
+    author: string;
+    timestamp: BigNumberish;
+  };
+
+  export type CommentStructOutput = [BigNumber, string, string, BigNumber] & {
+    id: BigNumber;
+    comment: string;
+    author: string;
+    timestamp: BigNumber;
+  };
+}
+
 export interface TwitterInterface extends utils.Interface {
   contractName: "Twitter";
   functions: {
     "addComment(string,uint256)": FunctionFragment;
     "createTweet(string)": FunctionFragment;
+    "getTweetComments(uint256)": FunctionFragment;
+    "getTweetLength()": FunctionFragment;
+    "getUserTweets(address)": FunctionFragment;
     "likeTweet(uint256)": FunctionFragment;
     "nextTweetId()": FunctionFragment;
     "tweets(uint256)": FunctionFragment;
     "unlikeTweet(uint256)": FunctionFragment;
-    "userTweets(address,uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -34,6 +53,18 @@ export interface TwitterInterface extends utils.Interface {
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "createTweet", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "getTweetComments",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTweetLength",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getUserTweets",
+    values: [string]
+  ): string;
   encodeFunctionData(
     functionFragment: "likeTweet",
     values: [BigNumberish]
@@ -50,14 +81,22 @@ export interface TwitterInterface extends utils.Interface {
     functionFragment: "unlikeTweet",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "userTweets",
-    values: [string, BigNumberish]
-  ): string;
 
   decodeFunctionResult(functionFragment: "addComment", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createTweet",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTweetComments",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTweetLength",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getUserTweets",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "likeTweet", data: BytesLike): Result;
@@ -70,7 +109,6 @@ export interface TwitterInterface extends utils.Interface {
     functionFragment: "unlikeTweet",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "userTweets", data: BytesLike): Result;
 
   events: {};
 }
@@ -106,13 +144,25 @@ export interface Twitter extends BaseContract {
     addComment(
       _comment: string,
       _id: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     createTweet(
       _tweet: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    getTweetComments(
+      _id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[Twitter.CommentStructOutput[]]>;
+
+    getTweetLength(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getUserTweets(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber[]]>;
 
     likeTweet(
       _id: BigNumberish,
@@ -138,24 +188,27 @@ export interface Twitter extends BaseContract {
       _id: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    userTweets(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
   };
 
   addComment(
     _comment: string,
     _id: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   createTweet(
     _tweet: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  getTweetComments(
+    _id: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<Twitter.CommentStructOutput[]>;
+
+  getTweetLength(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getUserTweets(_user: string, overrides?: CallOverrides): Promise<BigNumber[]>;
 
   likeTweet(
     _id: BigNumberish,
@@ -182,12 +235,6 @@ export interface Twitter extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  userTweets(
-    arg0: string,
-    arg1: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   callStatic: {
     addComment(
       _comment: string,
@@ -196,6 +243,18 @@ export interface Twitter extends BaseContract {
     ): Promise<void>;
 
     createTweet(_tweet: string, overrides?: CallOverrides): Promise<void>;
+
+    getTweetComments(
+      _id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<Twitter.CommentStructOutput[]>;
+
+    getTweetLength(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getUserTweets(
+      _user: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
 
     likeTweet(_id: BigNumberish, overrides?: CallOverrides): Promise<void>;
 
@@ -215,12 +274,6 @@ export interface Twitter extends BaseContract {
     >;
 
     unlikeTweet(_id: BigNumberish, overrides?: CallOverrides): Promise<void>;
-
-    userTweets(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
   };
 
   filters: {};
@@ -229,13 +282,22 @@ export interface Twitter extends BaseContract {
     addComment(
       _comment: string,
       _id: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     createTweet(
       _tweet: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    getTweetComments(
+      _id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getTweetLength(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getUserTweets(_user: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     likeTweet(
       _id: BigNumberish,
@@ -250,24 +312,30 @@ export interface Twitter extends BaseContract {
       _id: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    userTweets(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     addComment(
       _comment: string,
       _id: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     createTweet(
       _tweet: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    getTweetComments(
+      _id: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getTweetLength(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getUserTweets(
+      _user: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     likeTweet(
@@ -285,12 +353,6 @@ export interface Twitter extends BaseContract {
     unlikeTweet(
       _id: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    userTweets(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

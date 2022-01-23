@@ -19,6 +19,14 @@ const setLoading = (state: any, action: any) => {
     loading: action.payload.loading,
   }
 }
+
+const setTweets = (state: any, action: any) => {
+  return {
+    ...state,
+    tweets: action.payload.tweets,
+  }
+}
+
 export const reducer = (state: any, action: any) => {
   switch(action.type) {
     case 'SET_HAS_METAMASK':
@@ -28,6 +36,8 @@ export const reducer = (state: any, action: any) => {
       return setCurrentAccount(state, action);
     case 'SET_LOADING':
       return setLoading(state, action);
+    case 'SET_TWEETS':
+      return setTweets(state, action);
     default:
       return state;
     }       

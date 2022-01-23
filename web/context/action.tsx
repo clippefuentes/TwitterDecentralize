@@ -1,3 +1,5 @@
+import { Tweets } from "./index"
+
 export const Action = ({
   setAccount: (dispatch: any, value: string) => {
     dispatch({
@@ -20,6 +22,14 @@ export const Action = ({
       type: 'SET_LOADING',
       payload: {
         loading: value,
+      }
+    })
+  },
+  setTweets: (dispatch: any, value: Tweets[]) => {
+    dispatch({
+      type: 'SET_TWEETS',
+      payload: {
+        tweets: value,
       }
     })
   }

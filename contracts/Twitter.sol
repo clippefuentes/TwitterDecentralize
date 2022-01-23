@@ -76,4 +76,8 @@ contract Twitter {
   function getTweetComments(uint _id) public view returns (Comment[] memory) {
     return tweets[_id].comments;
   }
+
+  function getTweetLength() public view returns (uint) {
+    return tweets.length;
+  }
 }

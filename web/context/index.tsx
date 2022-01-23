@@ -1,4 +1,4 @@
-import { createContext, useMemo, useReducer, useEffect } from 'react';
+import { createContext, useMemo, useReducer, useEffect, Dispatch } from 'react';
 
 import { Action } from './action';
 import { reducer } from './reducer';
@@ -7,17 +7,43 @@ interface AppProps {
   children: React.ReactNode;
 }
 
-export const AppContext = createContext({
+export interface Tweets {
+  id: string;
+  tweetInfo: string;
+  author: string;
+  timestamp: Date;
+  likes: number;
+}
+
+
+interface AppState {
+  hasMetamask: boolean;
+  currentAccount: string | null;
+  loading: boolean;
+  setAccount: (address: string) => void;
+  setHasMetamask: (hasMetamask: boolean) => void;
+  setLoading: (loading: boolean) => void;
+  setTweets: (tweets: Tweets[]) => void;
+  tweets: Tweets[];
+}
+// id: id.toString(),
+//             tweetInfo,
+//             author,
+//             timestamp: new Date(timestamp.toNumber() * 1000),
+//             likes: likes.toNumber(),
+
+export const AppContext = createContext<AppState>({
   hasMetamask: false,
   currentAccount: null,
   loading: true,
   setAccount: (add: string) => {},
   setHasMetamask: (hasMetamask: boolean) => {},
   setLoading: (loading: boolean) => {},
+  setTweets: (tweets: Tweets[]) => {},
+  tweets: [],
 });
 
 const AppContextProvider = ({ children }: AppProps) => {
-
   const [state, dispatch] = useReducer(reducer, AppContext);
 
   const ProviderValue = useMemo(() => {
@@ -25,6 +51,7 @@ const AppContextProvider = ({ children }: AppProps) => {
       hasMetamask: state.hasMetamask,
       currentAccount: state.currentAccount,
       loading: state.loading,
+      tweets: state.tweets,
       setAccount: (address: string) => { 
         Action.setAccount(dispatch, address);
       },
@@ -34,11 +61,15 @@ const AppContextProvider = ({ children }: AppProps) => {
       setLoading: (loading: boolean) => {
         Action.setLoading(dispatch, loading);
       },
+      setTweets: (tweets: Tweets[]) => {
+        Action.setTweets(dispatch, tweets);
+      },
     }
   }, [
     state.hasMetamask,
     state.currentAccount,
     state.loading,
+    state.tweets,
   ]);
   
   return (
