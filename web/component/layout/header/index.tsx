@@ -1,58 +1,26 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { BsTwitter } from "react-icons/bs";
-import { ethers } from "ethers";
 
-import styles from "./index.module.scss"
+import styles from "./index.module.scss";
+import { AppContext } from "../../../context/";
 
-declare let window: any;
+export interface HeaderProps {
+  connectWallet: () => void;
+};
 
-const Header = () => {
-  const [hasMetamask, setHasMetamask] = useState(false);
-  const [currentAccount, setCurrentAccount] = useState(null);
+const Header = (props: HeaderProps) => {
+  const {
+    hasMetamask,
+    currentAccount,
+    loading,
+  } = useContext(AppContext);
 
-  const checkIfWalletIsConnected = useCallback(async () => {
-    try {
-      if (!window.ethereum) {
-        setHasMetamask(false);
-      } else {
-        const { ethereum } = window;
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        console.log('provider', provider);
-        setHasMetamask(true);
-
-        const accounts = await ethereum.request({ method: 'eth_accounts' });
-
-        if (accounts.length !== 0) {
-          const account = accounts[0];
-          console.log('Found an authorized account:', account);
-          setCurrentAccount(account);
-        } else {
-          console.log('No authorized account found');
-        }
-      }
-    } catch (err) {
-      // Router to error page
-    }
-  }, []);
-
-  const connectWallet = useCallback(async () => {
-    try {
-      if (!window.ethereum) {
-        setHasMetamask(false);
-      } else {
-        const { ethereum } = window;
-        const accounts = await ethereum.request({
-          method: 'eth_requestAccounts',
-        });
-        console.log('Connected', accounts[0]);
-        setCurrentAccount(accounts[0]);
-      }
-    } catch (err) {
-      // Router to error page
-    }
-  }, [setCurrentAccount, currentAccount])
+  const { connectWallet } = props;
 
   const HeaderNavigation = useCallback(() => {
+    if (loading || loading === undefined) {
+      return null;
+    }
     if (!hasMetamask) {
       return (
         <ul>
@@ -62,7 +30,6 @@ const Header = () => {
         </ul>
       )
     }
-
     if (!currentAccount) {
       return (
         <ul>
@@ -72,17 +39,6 @@ const Header = () => {
         </ul>
       )
     }
-
-    // const checkNetwork = useCallback(async () => {
-    //   try {
-    //     if (window.ethereum.networkVersion !== '4') {
-    //       alert("Please connect to Rinkeby!")
-    //     }
-    //   } catch (error) {
-    //     console.log(error)
-    //   }
-    // }, []) 
-
     return (
       <ul>
         <li>
@@ -93,11 +49,12 @@ const Header = () => {
         </li>
       </ul>
     )
-  }, [hasMetamask, currentAccount])
+  }, [hasMetamask, currentAccount, loading])
 
   useEffect(() => {
-    checkIfWalletIsConnected();
-  }, [])
+    console.log('CHANGING loading', loading)
+  }, [loading])
+
 
   return (
     <header className={styles.header}>

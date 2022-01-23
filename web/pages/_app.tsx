@@ -1,12 +1,21 @@
-import '../styles/globals.css'
 import type { AppProps } from 'next/app'
+import { useEffect, useCallback, useContext } from "react";
+
+import GlobalContext from '../context'
+
 import Layout from '../component/layout'
+
+import '../styles/globals.css'
+
+
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-  <Layout>
-    <Component {...pageProps} />
-  </Layout>
+    <GlobalContext>
+      <Layout>
+          <Component {...pageProps} />
+      </Layout>
+    </GlobalContext>
   )
 }
 
