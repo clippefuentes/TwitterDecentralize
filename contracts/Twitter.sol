@@ -23,6 +23,8 @@ contract Twitter {
   uint public nextTweetId = 0;
   mapping(address => uint[]) userTweets;
 
+  event NewTweet(address author, uint id, string tweet, uint timestamp);
+
   constructor() payable {}
 
   modifier hasLiked(uint _id) {
@@ -45,6 +47,8 @@ contract Twitter {
     tweet.timestamp = block.timestamp;
     tweet.likes = 0;
     userTweets[msg.sender].push(nextTweetId);
+    nextTweetId++;
+    emit NewTweet(msg.sender, nextTweetId, _tweet, block.timestamp);
   }
 
   function likeTweet(uint _id) external hasNotLiked(_id)  {

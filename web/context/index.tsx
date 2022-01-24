@@ -24,6 +24,7 @@ interface AppState {
   setHasMetamask: (hasMetamask: boolean) => void;
   setLoading: (loading: boolean) => void;
   setTweets: (tweets: Tweets[]) => void;
+  addTweet: (tweet: Tweets) => void;
   tweets: Tweets[];
 }
 // id: id.toString(),
@@ -40,6 +41,7 @@ export const AppContext = createContext<AppState>({
   setHasMetamask: (hasMetamask: boolean) => {},
   setLoading: (loading: boolean) => {},
   setTweets: (tweets: Tweets[]) => {},
+  addTweet: (tweet: Tweets) => {},
   tweets: [],
 });
 
@@ -63,6 +65,9 @@ const AppContextProvider = ({ children }: AppProps) => {
       },
       setTweets: (tweets: Tweets[]) => {
         Action.setTweets(dispatch, tweets);
+      },
+      addTweet: (tweet: Tweets) => {
+        Action.addTweet(dispatch, tweet);
       },
     }
   }, [

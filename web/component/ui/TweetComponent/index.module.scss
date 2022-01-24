@@ -1,0 +1,27 @@
+.tweetContainer {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid black;
+
+  &:hover {
+    background-color: rgb(133 206 255);
+  }
+}
+
+.headerTweet {
+  // background-color: aqua;
+}
+
+.bodyTweet {
+  // background-color: lightblue;
+}
+
+.footerTweet {
+  // background-color: lightgreen;
+  display: flex;
+  flex-direction: row;
+}
+
+.footerTweet p {
+  margin-right: 1rem;
+}

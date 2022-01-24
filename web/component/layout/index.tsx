@@ -1,7 +1,6 @@
 import { useEffect, useCallback, useContext } from "react";
-import { ethers } from "ethers";
 import { AppContext } from '../../context'
-import Twitter from '../../../artifacts/contracts/Twitter.sol/Twitter.json'
+import { getContract } from "../../utils";
 
 import Header, { HeaderProps } from './header';
 
@@ -19,7 +18,8 @@ const Layout = (props: any) => {
     setHasMetamask,
     setLoading,
     setTweets,
-    tweets
+    tweets,
+    addTweet
   } = useContext(AppContext);
 
   const { children } = props;
@@ -36,7 +36,6 @@ const Layout = (props: any) => {
 
         if (accounts.length !== 0) {
           const account = accounts[0];
-          console.log('Found an authorized account:', account);
           setCurrentAccount(account);
         } else {
           console.log('No authorized account found');
@@ -57,7 +56,6 @@ const Layout = (props: any) => {
         const accounts = await ethereum.request({
           method: 'eth_requestAccounts',
         });
-        console.log('Connected', accounts[0]);
         setCurrentAccount(accounts[0]);
       }
       setLoading(false);
@@ -66,21 +64,19 @@ const Layout = (props: any) => {
     }
   }, [setCurrentAccount, currentAccount, setLoading])
 
+
   const getTwitterTweets = useCallback(async () => {
     try {
       if (window.ethereum) {
         const { ethereum } = window;
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-        const connectedContract = new ethers.Contract('0x5FbDB2315678afecb367f032d93F642f64180aa3', Twitter.abi, signer);
-        const tweetsLength = await connectedContract.getTweetLength();
-        const tweets = await connectedContract.tweets;
+        const connectedContract = await getContract(ethereum);
+        const tweetsLength = await connectedContract?.getTweetLength();
+        const tweets = await connectedContract?.tweets;
 
         const tweetsArray = [];
 
         for (let i = 0; i < tweetsLength; i++) {
           const tweet = await tweets(i);
-          console.log('tweet', tweet);
           const [id, tweetInfo, author, timestamp, likes] = tweet;
           const tweetObject = {
             id: id.toString(),
@@ -89,8 +85,7 @@ const Layout = (props: any) => {
             timestamp: new Date(timestamp.toNumber() * 1000),
             likes: likes.toNumber(),
           };
-          tweetsArray.push(tweetObject);
-          console.log('tweetObject', tweetObject)
+          tweetsArray.unshift(tweetObject);
         }
 
         setTweets(tweetsArray);
@@ -101,10 +96,31 @@ const Layout = (props: any) => {
     }
   }, [tweets, setTweets])
 
+  const setupListeners = useCallback(async () => {
+    if (window.ethereum) {
+      const { ethereum } = window;
+      const connectedContract = await getContract(ethereum);
+      if (connectedContract) {
+        connectedContract.on('NewTweet', (author, tweetId, tweetMsg, timeStamp) => {
+          console.log('NewTweet', author, tweetId, tweetMsg, timeStamp);
+          addTweet({
+            id: tweetId.toString(),
+            tweetInfo: tweetMsg,
+            author,
+            timestamp: new Date(timeStamp.toNumber() * 1000),
+            likes: 0,
+          })
+        });
+      }
+      console.log('setupListeners');
+    }
+  }, [])
+
 
   useEffect(() => {
     checkIfWalletIsConnected();
     getTwitterTweets();
+    setupListeners();
   }, [])
 
   return (

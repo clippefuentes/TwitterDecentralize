@@ -14,7 +14,7 @@ import {
   Signer,
   utils,
 } from "ethers";
-import { FunctionFragment, Result } from "@ethersproject/abi";
+import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
@@ -110,8 +110,19 @@ export interface TwitterInterface extends utils.Interface {
     data: BytesLike
   ): Result;
 
-  events: {};
+  events: {
+    "NewTweet(address,uint256,string,uint256)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "NewTweet"): EventFragment;
 }
+
+export type NewTweetEvent = TypedEvent<
+  [string, BigNumber, string, BigNumber],
+  { author: string; id: BigNumber; tweet: string; timestamp: BigNumber }
+>;
+
+export type NewTweetEventFilter = TypedEventFilter<NewTweetEvent>;
 
 export interface Twitter extends BaseContract {
   contractName: "Twitter";
@@ -276,7 +287,20 @@ export interface Twitter extends BaseContract {
     unlikeTweet(_id: BigNumberish, overrides?: CallOverrides): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "NewTweet(address,uint256,string,uint256)"(
+      author?: null,
+      id?: null,
+      tweet?: null,
+      timestamp?: null
+    ): NewTweetEventFilter;
+    NewTweet(
+      author?: null,
+      id?: null,
+      tweet?: null,
+      timestamp?: null
+    ): NewTweetEventFilter;
+  };
 
   estimateGas: {
     addComment(

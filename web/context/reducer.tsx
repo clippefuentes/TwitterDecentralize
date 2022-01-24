@@ -27,6 +27,20 @@ const setTweets = (state: any, action: any) => {
   }
 }
 
+const addTweet = (state: any, action: any) => {
+  if (state.tweets) {
+    const newTweets = [...state.tweets];
+    newTweets.unshift(action.payload.tweet);
+    return {
+      ...state,
+      tweets: newTweets,
+    }
+  }
+  return {
+    ...state,
+  }
+}
+
 export const reducer = (state: any, action: any) => {
   switch(action.type) {
     case 'SET_HAS_METAMASK':
@@ -38,6 +52,8 @@ export const reducer = (state: any, action: any) => {
       return setLoading(state, action);
     case 'SET_TWEETS':
       return setTweets(state, action);
+    case 'ADD_TWEET':
+      return addTweet(state, action);
     default:
       return state;
     }       

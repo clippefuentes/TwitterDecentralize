@@ -1,27 +1,30 @@
 import type { NextPage } from 'next'
-import styles from '../styles/Home.module.css'
+import styles from '../styles/Home.module.scss'
 import { useContext, useEffect } from 'react';
 import { AppContext } from '../context';
+
+import TweetForm from '../component/form/TweetForm';
+import TweetComponent from '../component/ui/TweetComponent';
 
 const Home: NextPage = () => {
   const { tweets } = useContext(AppContext);
 
   useEffect(() => {
-    console.log('CHANGING tweets', tweets)
-  }, [tweets])
-
+    console.log('tweets', tweets);
+  }, [tweets]);
+  
   return (
     <div className={styles.container}>
-      {
-        tweets && tweets.map((tweet, index) => {
-          return (
-            <div key={index}>
-              <h1>{tweet.tweetInfo}</h1>
-              <p>{tweet.author}</p>
-            </div>
-          )
-        })
-      }
+      <div className={styles.postContainer}>
+        <TweetForm />
+        {
+          tweets && tweets.map((tweet, index) => {
+            return (
+              <TweetComponent key={index} {...tweet} />
+            )
+          })
+        }
+      </div>
     </div>
   )
 }

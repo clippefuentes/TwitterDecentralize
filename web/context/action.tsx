@@ -32,5 +32,13 @@ export const Action = ({
         tweets: value,
       }
     })
+  },
+  addTweet: (dispatch: any, value: Tweets) => {
+    dispatch({
+      type: 'ADD_TWEET',
+      payload: {
+        tweet: value,
+      }
+    })
   }
 })
