@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import Link from 'next/link'
 import styles from './index.module.scss'
 
@@ -17,9 +18,10 @@ const Tweet = (props: TweetProps) => {
     likes,  
     id,  
   } = props;
-  return (
-    <Link href={`tweets/${id}`}>
-      <div className={styles.tweetContainer}>
+
+  const TweetComponent = forwardRef<any, any>(({ onClick }, ref) => {
+    return (
+      <div className={styles.tweetContainer} onClick={onClick} ref={ref}>
         <div className={styles.headerTweet}>
           <h4>{author}</h4>
         </div>
@@ -31,6 +33,12 @@ const Tweet = (props: TweetProps) => {
           <p>Likes: {likes}</p>
         </div>
       </div>
+    )
+  })
+
+  return (
+    <Link href={`tweets/${id}`} passHref>
+      <TweetComponent />
     </Link>
   )
 }

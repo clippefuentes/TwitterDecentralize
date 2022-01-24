@@ -1,4 +1,5 @@
-import { useCallback, useContext, useEffect } from "react";
+import Link from 'next/link'
+import { forwardRef, useCallback, useContext, useEffect } from "react";
 import { BsTwitter } from "react-icons/bs";
 
 import styles from "./index.module.scss";
@@ -42,7 +43,9 @@ const Header = (props: HeaderProps) => {
     return (
       <ul>
         <li>
-          <a href="#">Home</a>
+          <Link href="/">
+            Home
+          </Link>
         </li>
         <li>
           <a href="#">Profile</a>
@@ -56,10 +59,18 @@ const Header = (props: HeaderProps) => {
   }, [loading])
 
 
+  const TwitterLogo = forwardRef<any, any>(({ onClick }, ref) => {
+    return (
+      <BsTwitter style={{ cursor: 'pointer' }} onClick={onClick} />
+    )
+  })
+
   return (
     <header className={styles.header}>
       <div>
-        <BsTwitter />
+        <Link href="/">
+          <TwitterLogo />
+        </Link>
       </div>
       <nav className={styles.headerNav}>
         <HeaderNavigation />

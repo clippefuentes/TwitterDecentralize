@@ -1,0 +1,29 @@
+.container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tweetContainer {
+  width: 55rem;
+  padding: 0 2rem;
+  margin: 1rem;
+  border: 1px solid black;
+  border-radius: 15px;
+  padding: 1rem;
+}
+
+.tweetContainerFooter > * {
+  margin: 0.1rem 0rem;
+}
+
+.tweetComments {
+  border: 1px solid black;
+  border-radius: 15px;
+  padding: 1rem;
+}
+
+.tweetComments > *  {
+  margin: 0.1rem 0rem;
+}

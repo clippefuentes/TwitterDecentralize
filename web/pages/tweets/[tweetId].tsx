@@ -1,16 +1,138 @@
 import { useRouter } from "next/router";
+import { useEffect, useCallback, useState } from "react";
+import { GetStaticPropsContext, GetServerSideProps } from "next";
+import { getContract } from "../../utils";
+import styles from '../../styles/TweetPage.module.scss'
+import stylesFromForm from '../../component/form/TweetForm/index.module.scss'
+import { Tweets } from '../../context'
+
+declare let window: any;
+
+export interface Comment {
+  commentId: string;
+  comment: string;
+  author: string;
+  commentTimestamp: Date;
+}
 
 const TweetPage = () => {
   const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [tweet, setTweet] = useState<Tweets>({
+    id: '',
+    tweetInfo: '',
+    author: '',
+    timestamp: new Date(),
+    likes: 0,
+  })
+  const [comments, setComments] = useState<Comment[]>([])
 
   const { tweetId } = router.query;
 
+  useEffect(() => {
+    if (!tweetId) {
+      router.push('/')
+    }
+  }, [tweetId, router])
+
+  useEffect(() => {
+    if (window.ethereum) {
+      getTweet();
+      getComments();
+    }
+  }, [])
+
+  const getTweet = useCallback(async () => {
+    try {
+      if (window.ethereum) {
+        const { ethereum } = window;
+        const connectedContract = await getContract(ethereum);
+        if (connectedContract) {
+          const tweet = await connectedContract.tweets(tweetId);
+          const [id, tweetInfo, author, timestamp, likes] = tweet;
+          const tweetObject = {
+            id: id.toString(),
+            tweetInfo,
+            author,
+            timestamp: new Date(timestamp.toNumber() * 1000),
+            likes: likes.toNumber(),
+          };
+          setTweet(tweetObject);
+          console.log('tweet', tweet);
+        }
+      }
+    } catch(err) {
+      console.error(err)
+    }
+  }, [tweetId]);
+
+  const getComments = useCallback(async () => {
+    try {
+      if (window.ethereum) {
+        const { ethereum } = window;
+        const connectedContract = await getContract(ethereum);
+        if (connectedContract) {
+          let comments = await connectedContract.getTweetComments(tweetId);
+
+          comments = comments.map((com: any) => {
+            const [commentId, comment, author, commentTimestamp] = com;
+            const tweetObject = {
+              commentId: commentId.toString(),
+              comment,
+              author,
+              commentTimestamp: new Date(commentTimestamp.toNumber() * 1000).toLocaleString(),
+            };
+            return tweetObject;
+          })
+          setComments(comments);
+        }
+      }
+    } catch(err) {
+      console.error(err)
+    }
+  }, [tweetId])
+
+  const CommentSection = useCallback(() => {
+    console.log('comments', comments);
+    return (
+      <div>
+        <h3>Comments: </h3>
+        {comments && comments.length ? comments.map((comment: Comment) => {
+          return (
+            <div className={styles.tweetComments}>
+              <p>{comment.comment}</p>
+              <h5>Comment By: {comment.author}</h5>
+              <h5 suppressHydrationWarning>Tweet on: {comment.commentTimestamp}</h5>
+            </div>
+          )
+        }) : "No Comments"}
+      </div>
+    )
+  }, [setComments, comments])
+
   return (
-    <div>
-      <h1>Tweet Page</h1>
-      <p>Tweet ID: {tweetId}</p>
+    <div className={styles.container}>
+      <div className={styles.tweetContainer}>
+        <p>{tweet.tweetInfo}</p>
+        <div className={styles.tweetContainerFooter}>
+          <h5>Tweet By: {tweet.author}</h5>
+          <h5 suppressHydrationWarning>Tweet on: {tweet.timestamp.toLocaleString()}</h5>
+          <h5>Likes: {tweet.likes}</h5>
+        </div>
+      </div>
+      <button className={stylesFromForm.button}>Like</button>
+      {
+        CommentSection()
+      }
     </div>
   )
-} 
+}
+
+export async function getServerSideProps(contextProps: any) {
+  console.log('contextProps', contextProps.params)
+  return {
+    props: contextProps?.params
+  };
+}
 
 export default TweetPage;

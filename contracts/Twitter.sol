@@ -84,4 +84,8 @@ contract Twitter {
   function getTweetLength() public view returns (uint) {
     return tweets.length;
   }
+
+  function getLikedByTweet(uint _id) public view returns (bool) {
+    return tweets[_id].likedBy[msg.sender];
+  }
 }
