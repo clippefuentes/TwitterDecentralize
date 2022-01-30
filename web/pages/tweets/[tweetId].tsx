@@ -1,10 +1,11 @@
 import { useRouter } from "next/router";
 import { useEffect, useCallback, useState } from "react";
-import { GetStaticPropsContext, GetServerSideProps } from "next";
+// import { GetStaticPropsContext, GetServerSideProps } from "next";
 import { getContract } from "../../utils";
 import styles from '../../styles/TweetPage.module.scss'
 import stylesFromForm from '../../component/form/TweetForm/index.module.scss'
 import { Tweets } from '../../context'
+import TweetForm from '../../component/form/TweetForm'
 
 declare let window: any;
 
@@ -92,14 +93,42 @@ const TweetPage = () => {
     }
   }, [tweetId])
 
+  const addCommentToTweet = useCallback(async (comment, setComment) => {
+    if (!comment || comment === '') {
+      alert('Please enter a tweet');
+      return;
+    }
+    try {
+      if (window.ethereum) {
+        const { ethereum } = window;
+        const connectedContract = await getContract(ethereum);
+        console.log('tweet', comment);
+        console.log('tweetId', tweetId)
+        console.log('window.ethereum.selectedAddress', ethereum.selectedAddress);
+        if (connectedContract) {
+          await connectedContract.addComment(comment, tweetId, {
+            from: window.ethereum.selectedAddress,
+            gasLimit: 3000000
+          });
+        setComment('');
+        }
+      }
+    } catch(err) {
+      //
+      console.error(err);
+    }
+  }, []);
+
   const CommentSection = useCallback(() => {
     console.log('comments', comments);
     return (
-      <div>
+      <div className={styles.commentContainer}>
+        <TweetForm submit={addCommentToTweet} buttonText="Add Comment" />
         <h3>Comments: </h3>
-        {comments && comments.length ? comments.map((comment: Comment) => {
+        { /** TODO: Change indx */}
+        {comments && comments.length ? comments.map((comment: Comment, indx: number) => {
           return (
-            <div className={styles.tweetComments}>
+            <div className={styles.tweetComments} key={indx  }>
               <p>{comment.comment}</p>
               <h5>Comment By: {comment.author}</h5>
               <h5 suppressHydrationWarning>Tweet on: {comment.commentTimestamp}</h5>
