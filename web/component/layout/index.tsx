@@ -116,11 +116,25 @@ const Layout = (props: any) => {
     }
   }, [])
 
+  const removeListeners = useCallback(async () => {
+    if (window.ethereum) {
+      const { ethereum } = window;
+      const connectedContract = await getContract(ethereum);
+      if (connectedContract) {
+        connectedContract.removeAllListeners();
+      }
+      console.log('removeListeners');
+    }
+  }, [])
+
 
   useEffect(() => {
     checkIfWalletIsConnected();
     getTwitterTweets();
     setupListeners();
+    return () => {
+      removeListeners();
+    }
   }, [])
 
   return (

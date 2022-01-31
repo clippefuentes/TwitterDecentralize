@@ -6,7 +6,7 @@ export const getContract = async (ethereum: any) => {
     if (ethereum) {
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
-      const connectedContract = new ethers.Contract('0x235b6c2277a47f39058Aa9EA7AC423c4Ff4dc876', Twitter.abi, signer);
+      const connectedContract = new ethers.Contract('0x570880fB1B268d2B589cA257D1C3aeA4B82C36AD', Twitter.abi, signer);
       console.log('Connected to contract', connectedContract);
       return connectedContract;
     } else {

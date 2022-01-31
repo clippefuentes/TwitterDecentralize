@@ -24,6 +24,7 @@ contract Twitter {
   mapping(address => uint[]) userTweets;
 
   event NewTweet(address author, uint id, string tweet, uint timestamp);
+  event NewComment(address author, uint id, string comment, uint timestamp);
 
   constructor() payable {}
 
@@ -71,6 +72,7 @@ contract Twitter {
     comment.author = msg.sender;
     comment.timestamp = block.timestamp;
     comment.id = commentId;
+    emit NewComment(msg.sender, commentId, _comment, block.timestamp);
   }
 
   function getUserTweets(address _user) public view returns (uint[] memory) {

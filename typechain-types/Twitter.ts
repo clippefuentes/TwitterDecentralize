@@ -120,11 +120,20 @@ export interface TwitterInterface extends utils.Interface {
   ): Result;
 
   events: {
+    "NewComment(address,uint256,string,uint256)": EventFragment;
     "NewTweet(address,uint256,string,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "NewComment"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewTweet"): EventFragment;
 }
+
+export type NewCommentEvent = TypedEvent<
+  [string, BigNumber, string, BigNumber],
+  { author: string; id: BigNumber; comment: string; timestamp: BigNumber }
+>;
+
+export type NewCommentEventFilter = TypedEventFilter<NewCommentEvent>;
 
 export type NewTweetEvent = TypedEvent<
   [string, BigNumber, string, BigNumber],
@@ -312,6 +321,19 @@ export interface Twitter extends BaseContract {
   };
 
   filters: {
+    "NewComment(address,uint256,string,uint256)"(
+      author?: null,
+      id?: null,
+      comment?: null,
+      timestamp?: null
+    ): NewCommentEventFilter;
+    NewComment(
+      author?: null,
+      id?: null,
+      comment?: null,
+      timestamp?: null
+    ): NewCommentEventFilter;
+
     "NewTweet(address,uint256,string,uint256)"(
       author?: null,
       id?: null,

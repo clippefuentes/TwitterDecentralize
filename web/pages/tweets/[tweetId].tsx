@@ -33,13 +33,20 @@ const TweetPage = () => {
   useEffect(() => {
     if (!tweetId) {
       router.push('/')
+    } else {
+      getTweet();
+      getComments();
     }
   }, [tweetId, router])
 
   useEffect(() => {
     if (window.ethereum) {
-      getTweet();
-      getComments();
+      // getTweet();
+      // getComments();
+      setupListeners();
+    }
+    return () => {
+      removeListeners();
     }
   }, [])
 
@@ -59,6 +66,7 @@ const TweetPage = () => {
             likes: likes.toNumber(),
           };
           setTweet(tweetObject);
+          setLoading(false)
           console.log('tweet', tweet);
         }
       }
@@ -73,7 +81,7 @@ const TweetPage = () => {
         const { ethereum } = window;
         const connectedContract = await getContract(ethereum);
         if (connectedContract) {
-          let comments = await connectedContract.getTweetComments(tweetId);
+          let comments:any[] = await connectedContract.getTweetComments(tweetId);
 
           comments = comments.map((com: any) => {
             const [commentId, comment, author, commentTimestamp] = com;
@@ -84,7 +92,7 @@ const TweetPage = () => {
               commentTimestamp: new Date(commentTimestamp.toNumber() * 1000).toLocaleString(),
             };
             return tweetObject;
-          })
+          }).reverse();
           setComments(comments);
         }
       }
@@ -119,6 +127,31 @@ const TweetPage = () => {
     }
   }, []);
 
+  const setupListeners = useCallback(async () => {
+    if (window.ethereum) {
+      const { ethereum } = window;
+      const connectedContract = await getContract(ethereum);
+      if (connectedContract) {
+        connectedContract.on('NewComment', async () => {
+          console.log('NEW COMMENT');
+          await getComments();
+        });
+      }
+      console.log('setupListeners');
+    }
+  }, [])
+
+  const removeListeners = useCallback(async () => {
+    if (window.ethereum) {
+      const { ethereum } = window;
+      const connectedContract = await getContract(ethereum);
+      if (connectedContract) {
+        connectedContract.removeAllListeners('NewComment');
+      }
+      console.log('removeListeners');
+    }
+  }, [])
+
   const CommentSection = useCallback(() => {
     console.log('comments', comments);
     return (
@@ -128,7 +161,7 @@ const TweetPage = () => {
         { /** TODO: Change indx */}
         {comments && comments.length ? comments.map((comment: Comment, indx: number) => {
           return (
-            <div className={styles.tweetComments} key={indx  }>
+            <div className={styles.tweetComments} key={indx}>
               <p>{comment.comment}</p>
               <h5>Comment By: {comment.author}</h5>
               <h5 suppressHydrationWarning>Tweet on: {comment.commentTimestamp}</h5>
@@ -141,7 +174,9 @@ const TweetPage = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.tweetContainer}>
+      {loading && <div> Loading... </div>}
+      {!loading && (<>
+        <div className={styles.tweetContainer}>
         <p>{tweet.tweetInfo}</p>
         <div className={styles.tweetContainerFooter}>
           <h5>Tweet By: {tweet.author}</h5>
@@ -153,6 +188,8 @@ const TweetPage = () => {
       {
         CommentSection()
       }
+      </>)}
+    
     </div>
   )
 }
