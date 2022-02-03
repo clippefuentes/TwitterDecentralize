@@ -37,7 +37,12 @@ const Tweet = (props: TweetProps) => {
   })
 
   return (
-    <Link href={`tweets/${id}`} passHref>
+    <Link href={{
+      pathname: '/tweets/[tweetId]',
+      query: {
+        tweetId: id,
+      },
+    }}>
       <TweetComponent />
     </Link>
   )
