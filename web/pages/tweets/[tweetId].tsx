@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useRouter } from "next/router";
 import { useEffect, useCallback, useState } from "react";
 // import { GetStaticPropsContext, GetServerSideProps } from "next";
@@ -179,7 +180,13 @@ const TweetPage = () => {
         <div className={styles.tweetContainer}>
         <p>{tweet.tweetInfo}</p>
         <div className={styles.tweetContainerFooter}>
-          <h5>Tweet By: {tweet.author}</h5>
+          <h5>Tweet By: <Link href={{
+              pathname: '/users/[address]',
+              query: {
+                address: tweet.author,
+              },
+            }}><span className={styles.tweetUser}>{tweet.author}</span></Link>
+          </h5>
           <h5 suppressHydrationWarning>Tweet on: {tweet.timestamp.toLocaleString()}</h5>
           <h5>Likes: {tweet.likes}</h5>
         </div>

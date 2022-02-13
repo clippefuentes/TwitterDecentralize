@@ -32,3 +32,10 @@
 .commentContainer {
   width: 55rem;
 }
+
+.tweetUser {
+  &:hover {
+    background-color: #9f9f9f;
+    cursor: pointer;
+  }
+}

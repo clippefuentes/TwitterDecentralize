@@ -48,7 +48,17 @@ const Header = (props: HeaderProps) => {
           </Link>
         </li>
         <li>
-          <a href="#">Profile</a>
+          {
+            
+          }
+          <Link href={{
+            pathname: '/users/[address]',
+            query: {
+              address: currentAccount,
+            },
+          }}>
+            Profile
+          </Link>
         </li>
       </ul>
     )
